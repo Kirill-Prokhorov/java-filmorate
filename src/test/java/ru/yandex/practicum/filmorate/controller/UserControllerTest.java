@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import ru.yandex.practicum.filmorate.exception.NoSuchItemException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 
@@ -86,7 +86,7 @@ class UserControllerTest {
         this.mockMvc.perform(
                         put("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NoSuchItemException));
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
     }
 
     @Test
@@ -98,7 +98,7 @@ class UserControllerTest {
         this.mockMvc.perform(
                         put("/users").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NoSuchItemException));
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
     }
 
 }

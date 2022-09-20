@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -8,8 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import ru.yandex.practicum.filmorate.exception.NoSuchItemException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 
@@ -62,7 +62,7 @@ class FilmControllerTest {
         mockMvc.perform(
                         put("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NoSuchItemException));
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
     }
 
     @Test
@@ -73,7 +73,7 @@ class FilmControllerTest {
         mockMvc.perform(
                         put("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NoSuchItemException));
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
     }
 
     @Test
@@ -86,7 +86,7 @@ class FilmControllerTest {
         mockMvc.perform(
                 post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ValidationException));
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException));
     }
 
     @Test
@@ -99,7 +99,8 @@ class FilmControllerTest {
         mockMvc.perform(
                         post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ValidationException));
+                .andExpect(result -> assertTrue(result.getResolvedException()
+                        instanceof MethodArgumentNotValidException));
     }
 
 }

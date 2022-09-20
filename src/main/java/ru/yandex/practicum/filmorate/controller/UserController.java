@@ -1,9 +1,9 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NoSuchItemException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.IdUserGenerator;
 
@@ -42,14 +42,14 @@ public class UserController {
         if(user.getId() < 1 ) {
 
             log.warn("Проблема с id в методе Put");
-            throw new NoSuchItemException("Id пользователя не соответствует требованиям!");
+            throw new NotFoundException("Id пользователя не соответствует требованиям!");
         }
 
         log.info("Хотим обновить пользователя");
         if (!storage.containsKey(user.getId())) {
 
             log.warn("В методе PUT/users пытаетесь обновить пользователя с несуществующим ID");
-            throw new NoSuchItemException("Нет пользователя с ID - " + user.getId());
+            throw new NotFoundException("Нет пользователя с ID - " + user.getId());
         }
 
         log.info("Хотим вернуть пользователя");
