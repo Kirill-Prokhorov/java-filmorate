@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,6 +17,7 @@ public class UserService implements GeneralService<User>{
 
     private final UserStorage<User> storage;
 
+    @Autowired
     public UserService(UserStorage<User> storage) {
         this.storage = storage;
     }
