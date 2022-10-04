@@ -1,65 +1,78 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.IdUserGenerator;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    private Map<Long, User> storage = new HashMap<>();
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-
-        user.setId(IdUserGenerator.getIdUser());
-
-        if(!StringUtils.hasText(user.getName())) {
-
-            log.info("Нет Имени пользователя. Будет использоваться Login");
-            user.setName(user.getLogin());
-        }
-        storage.put(user.getId(), user);
-        return user;
+        log.warn("В POST/films обрабатываем запрос на создание пользователя.");
+        return userService.addData(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user)  {
-
-        log.info("Обрабатываем Put/users запрос");
-
-        if(user.getId() < 1 ) {
-
-            log.warn("Проблема с id в методе Put");
-            throw new NotFoundException("Id пользователя не соответствует требованиям!");
-        }
-
-        log.info("Хотим обновить пользователя");
-        if (!storage.containsKey(user.getId())) {
-
-            log.warn("В методе PUT/users пытаетесь обновить пользователя с несуществующим ID");
-            throw new NotFoundException("Нет пользователя с ID - " + user.getId());
-        }
-
-        log.info("Хотим вернуть пользователя");
-        storage.put(user.getId(), user);
-        return user;
+        log.warn("В PUT/films обрабатываем запрос на обновление пользователя.");
+        return userService.update(user);
     }
 
     @GetMapping
     public List<User> users() {
-
-        return new ArrayList<>(storage.values());
+        log.warn("В GET/films обрабатываем запрос на список всех пользователей");
+        return userService.getAll();
     }
+
+    @GetMapping(value = "/{id}")
+    public User getUserById(@PathVariable Long id) {
+        log.info("В GET/films обрабатываем запрос на поиск пользователя по ID");
+        return userService.getById(id);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        log.info("В DELETE/films обрабатываем запрос на удаление пользователя по ID");
+        userService.deleteById(id);
+    }
+
+    @PutMapping(value = "/{id}/friends/{friendId}")
+    public void addToFriends(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("В PUT/films обрабатываем запрос на добавление друга");
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping(value = "/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("В DELETE/films обрабатываем запрос на удаление друга");
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping(value = "/{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        log.info("В GET/films обрабатываем запрос на выдачу всех друзей");
+        return userService.getAllFriends(id);
+    }
+
+    @GetMapping(value = "/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        log.info("В GET/films обрабатываем запрос на выдачу общих друзей");
+        return userService.getCommonFriends(id, otherId);
+    }
+
 }
