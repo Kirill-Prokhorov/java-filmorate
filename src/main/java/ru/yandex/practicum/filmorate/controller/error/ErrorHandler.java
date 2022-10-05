@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+
+import javax.validation.ValidationException;
+
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
@@ -18,10 +21,10 @@ public class ErrorHandler {
         log.info("404 {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
-
+    
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequestException(final BadRequestException e) {
+    public ErrorResponse handleValidationException(final ValidationException e) {
 
         log.info("400 {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
