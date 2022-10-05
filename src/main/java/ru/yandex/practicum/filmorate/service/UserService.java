@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -62,7 +63,7 @@ public class UserService implements GeneralService<User>{
         }
 
         log.warn("Запрос на добавление в друзья несуществующего пользователя.");
-        throw new NotFoundException(String.format("Пользователь с ID: %d не существует", friendId));
+        throw new BadRequestException(String.format("Пользователь с ID: %d не существует", friendId));
 
     }
 
@@ -73,7 +74,7 @@ public class UserService implements GeneralService<User>{
         } else {
 
             log.warn("Запрос на удаление из друзей несуществующего друга");
-            throw new NotFoundException(String.format("Друг с ID: %d не существует", friendId));
+            throw new BadRequestException(String.format("Друг с ID: %d не существует", friendId));
         }
     }
 

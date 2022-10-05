@@ -36,7 +36,7 @@ public class FilmService implements GeneralService<Film>{
         if (data.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
 
             log.warn("Нужен релиз после 1985.12.28");
-            throw new ItemAlreadyExistsException("Дата релиза не соответсвует требованиям =(");
+            throw new BadRequestException("Дата релиза не соответсвует требованиям =(");
         }
 
         data.setId(IdFilmGenerator.getFilmId());
@@ -70,7 +70,7 @@ public class FilmService implements GeneralService<Film>{
             storage.getById(id).setRate(storage.getById(id).getLikesByUserIds().size());
         } else {
             log.warn("Запрос на удаление отсутствующего лайка");
-            throw new NotFoundException("Лайк данного пользователя под этим фильмом отсутствует");
+            throw new BadRequestException("Лайк данного пользователя под этим фильмом отсутствует");
         }
     }
 
