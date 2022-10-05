@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -35,7 +36,7 @@ public class FilmService implements GeneralService<Film>{
         if (data.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
 
             log.warn("Нужен релиз после 1985.12.28");
-            throw new DataNotFoundException("Дата релиза не соответсвует требованиям =(");
+            throw new ValidationException("Дата релиза не соответсвует требованиям =(");
         }
 
         data.setId(IdFilmGenerator.getFilmId());
