@@ -33,7 +33,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleAlreadyExistException(final DataNotFoundException e) {
 
         log.info("409 {}", e.getMessage());
