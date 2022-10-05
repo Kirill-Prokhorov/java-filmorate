@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.ItemAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -35,7 +36,7 @@ public class FilmService implements GeneralService<Film>{
         if (data.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
 
             log.warn("Нужен релиз после 1985.12.28");
-            throw new BadRequestException("Дата релиза не соответсвует требованиям =(");
+            throw new ItemAlreadyExistsException("Дата релиза не соответсвует требованиям =(");
         }
 
         data.setId(IdFilmGenerator.getFilmId());
