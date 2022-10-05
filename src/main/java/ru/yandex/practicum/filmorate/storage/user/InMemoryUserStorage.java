@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ItemAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import java.util.ArrayList;
@@ -56,6 +57,10 @@ public class InMemoryUserStorage implements UserStorage<User>{
     @Override
     public User addData(User data) {
 
+        if (storage.containsKey(data.getId())) {
+            log.warn("Запрос на добавление уже существующего юзера");
+            throw new ItemAlreadyExistsException(String.format("Пользователь ID: уже зарегистрирован.", data.getId()));
+        }
         storage.put(data.getId(), data);
         return data;
     }
