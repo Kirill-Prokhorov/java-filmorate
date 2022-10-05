@@ -43,6 +43,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film addData(Film data) {
 
         if (storage.containsKey(data.getId())) {
+
             log.warn("Запрос на добавление уже существующего фильма");
             throw new ItemAlreadyExistsException(String.format("Фильм %s уже есть в списке.", data.getName()));
         }
