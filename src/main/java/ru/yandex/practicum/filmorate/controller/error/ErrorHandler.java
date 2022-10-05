@@ -34,9 +34,9 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleAlreadyExistException(final DataNotFoundException e) {
+    public ErrorResponse handleAlreadyExistException(final ValidationException e) {
 
-        log.info("409 {}", e.getMessage());
+        log.info("400 {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
