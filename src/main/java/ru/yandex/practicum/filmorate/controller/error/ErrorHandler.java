@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import javax.validation.ValidationException;
@@ -28,6 +29,14 @@ public class ErrorHandler {
     public ErrorResponse handleValidationException(final MethodArgumentNotValidException e) {
 
         log.info("400 {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleAlreadyExistException(final DataNotFoundException e) {
+
+        log.info("409 {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 

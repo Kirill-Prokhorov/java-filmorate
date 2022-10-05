@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ItemAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import java.util.*;
@@ -45,7 +45,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (storage.containsKey(data.getId())) {
 
             log.warn("Запрос на добавление уже существующего фильма");
-            throw new ItemAlreadyExistsException(String.format("Фильм %s уже есть в списке.", data.getName()));
+            throw new DataNotFoundException(String.format("Фильм %s уже есть в списке.", data.getName()));
         }
         storage.put(data.getId(), data);
         return data;
