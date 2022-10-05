@@ -3,8 +3,11 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.IdUserGenerator;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,9 +61,11 @@ public class InMemoryUserStorage implements UserStorage<User>{
     public User addData(User data) {
 
         if (storage.containsKey(data.getId())) {
+
             log.warn("Запрос на добавление уже существующего юзера");
-            throw new BadRequestException(String.format("Пользователь ID: уже зарегистрирован.", data.getId()));
+            throw new BadRequestException(String.format("Пользователь ID: %d уже зарегистрирован.", data.getId()));
         }
+        data.setId(IdUserGenerator.getUserId());
         storage.put(data.getId(), data);
         return data;
     }

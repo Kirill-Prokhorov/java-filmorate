@@ -18,6 +18,7 @@ public class UserService implements GeneralService<User>{
 
     private final UserStorage<User> storage;
 
+    @Autowired
     public UserService(UserStorage<User> storage) {
         this.storage = storage;
     }
@@ -35,7 +36,7 @@ public class UserService implements GeneralService<User>{
             log.info("Нет Имени пользователя. Будет использоваться Login");
             data.setName(data.getLogin());
         }
-        data.setId(IdUserGenerator.getUserId());
+
         return storage.addData(data);
     }
 

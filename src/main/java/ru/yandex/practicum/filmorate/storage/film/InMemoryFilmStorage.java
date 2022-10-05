@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.IdFilmGenerator;
-
 import java.time.LocalDate;
 import java.util.*;
 
@@ -14,7 +13,7 @@ import java.util.*;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private Map<Long,Film> storage = new HashMap<>();
+    private final Map<Long,Film> storage = new HashMap<>();
 
     @Override
     public List<Film> getAll() {
@@ -56,7 +55,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.warn("Запрос на добавление уже существующего фильма");
             throw new BadRequestException(String.format("Фильм %s уже есть в списке.", data.getName()));
         }
-        
+
         data.setId(IdFilmGenerator.getFilmId());
         storage.put(data.getId(), data);
         log.info(String.format("Фильм %s дообавлен. ID = %d",data.getDescription(), data.getId()));
