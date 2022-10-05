@@ -2,9 +2,12 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -42,10 +45,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addData(Film data) {
 
+        if (data.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+
+            log.warn("Нужен релиз после 1985.12.28");
+            throw new BadRequestException("Дата релиза не соответсвует требованиям =(");
+        }
+
         if (storage.containsKey(data.getId())) {
 
             log.warn("Запрос на добавление уже существующего фильма");
-            throw new DataNotFoundException(String.format("Фильм %s уже есть в списке.", data.getName()));
+            throw new BadRequestException(String.format("Фильм %s уже есть в списке.", data.getName()));
         }
         storage.put(data.getId(), data);
         return data;
