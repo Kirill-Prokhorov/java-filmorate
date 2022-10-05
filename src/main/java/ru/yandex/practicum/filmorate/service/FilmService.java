@@ -36,7 +36,7 @@ public class FilmService implements GeneralService<Film>{
         if (data.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
 
             log.warn("Нужен релиз после 1985.12.28");
-            throw new ValidationException("Дата релиза не соответсвует требованиям =(");
+            throw new BadRequestException("Дата релиза не соответсвует требованиям =(");
         }
 
         data.setId(IdFilmGenerator.getFilmId());
