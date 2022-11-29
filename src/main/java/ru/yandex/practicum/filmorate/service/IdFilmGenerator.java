@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.service;
 
 public class IdFilmGenerator {
 
-    private static long idFilm = 0;
+    private static long id = 0L;
 
-    public static long getId() {
+    public static long getFilmId() {
 
-        return ++idFilm;
+        return ++id;
     }
 }
