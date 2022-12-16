@@ -1,109 +1,136 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import java.time.LocalDate;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@AutoConfigureTestDatabase
 @AutoConfigureMockMvc
-class FilmControllerTest {
-
+@SpringBootTest
+public class FilmControllerTest {
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
-    private static final LocalDate TEST_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-    private static long DURATION = 200;
 
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    @Test
-    void createFilmTest() throws Exception {
+    private static Gson gson;
 
-        Film film = new Film(0, "TestName", "TestDescription",
-                TEST_RELEASE_DATE, DURATION);
-        String body = objectMapper.writeValueAsString(film);
-
-        mockMvc.perform(
-                        post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+    @BeforeAll
+    public static void beforeAll() {
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new DateAdapter())
+                .create();
     }
 
     @Test
-    public void exceptionCreateFilm() throws Exception {
+    @Order(1)
+    public void shouldAddANewFilmWithBorderlineValues() throws Exception {
+        Film film = new Film(1L,"Men", "HorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilm" +
+                "HorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilm" +
+                "HorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilmHorrorFilm",
+                LocalDate.of(1895, 12, 28),
+                1, new Mpa(1, "G"));
+        String json = gson.toJson(film);
+        MvcResult mvcResult = mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(json))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertEquals(film, gson.fromJson(mvcResult.getResponse().getContentAsString(), Film.class));
+    }
 
-        Film film = new Film(0, "", "TestDescription", TEST_RELEASE_DATE, DURATION);
-        String body = objectMapper.writeValueAsString(film);
-
-        this.mockMvc.perform(
-                        post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
+    @Test
+    @Order(2)
+    public void shouldFailAddingANewFilmEmptyName() throws Exception {
+        Film film = new Film(2L, " ", "Road movie", LocalDate.of(2010, 10, 1),
+                90, new Mpa(1, "G"));
+        String json = gson.toJson(film);
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(json))
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException()
-                        instanceof MethodArgumentNotValidException));
+                .andReturn();
     }
 
     @Test
-    void updateFilmWithBadIdTest() throws Exception {
+    @Order(3)
+    public void shouldFailAddingANewFilmDateTooEarly() throws Exception {
+        Film film = new Film(3L,"Mads", "Horror", LocalDate.of(1895, 12, 27),
+                100, new Mpa(1, "G"));
+        String json = gson.toJson(film);
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andExpect(result -> assertEquals("Дата релиза не соответсвует требованиям =(",
+                        result.getResolvedException().getMessage()))
+                .andReturn();
+    }
 
-        Film film = new Film(0, "TestName", "TestDescription", TEST_RELEASE_DATE, DURATION);
-        String body = objectMapper.writeValueAsString(film);
-        mockMvc.perform(
-                        put("/films").content(body).contentType(MediaType.APPLICATION_JSON))
+    @Test
+    @Order(4)
+    public void shouldFailAddingANewFilmNegativeDuration() throws Exception {
+        Film film = new Film(4L, "Mads", "Horror", LocalDate.of(2022, 5, 15),
+                -1, new Mpa(1, "G"));
+        String json = gson.toJson(film);
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    @Order(5)
+    public void shouldUpdateAnExistingFilm() throws Exception {
+        Film film = new Film(1L,"Mads", "Horror", LocalDate.of(1965, 5, 14),
+                1, new Mpa(1, "G"));
+        String json = gson.toJson(film);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/films")
+                        .contentType("application/json")
+                        .content(json))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertEquals(film, gson.fromJson(mvcResult.getResponse().getContentAsString(), Film.class));
+    }
+
+    @Test
+    @Order(6)
+    public void shouldShowAllFilms() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get("/films")
+                        .contentType("application/json"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(gson.fromJson(mvcResult.getResponse().getContentAsString(), List.class));
+    }
+
+    @Test
+    @Order(7)
+    public void shouldThrow404() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/films/9")
+                        .contentType("application/json"))
                 .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
-    }
-
-    @Test
-    void updateFilmWithNonexistentIdTest() throws Exception {
-
-        Film film = new Film(1, "TestName", "TestDescription", TEST_RELEASE_DATE, DURATION);
-        String body = objectMapper.writeValueAsString(film);
-        mockMvc.perform(
-                        put("/films").content(body).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
-    }
-
-    @Test
-    void badReleaseDateCreateFilmTest() throws Exception {
-
-        Film film = new Film(0, "TestName", "TestDescription",
-                TEST_RELEASE_DATE.minusDays(1), DURATION);
-        String body = objectMapper.writeValueAsString(film);
-
-        mockMvc.perform(
-                post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadRequestException));
-    }
-
-    @Test
-    void badDescriptionCreateFilmTest() throws Exception {
-
-        Film film = new Film(0, "TestName", "TestDescription".repeat(200),
-                TEST_RELEASE_DATE, DURATION);
-        String body = objectMapper.writeValueAsString(film);
-
-        mockMvc.perform(
-                        post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertTrue(result.getResolvedException()
-                        instanceof MethodArgumentNotValidException));
+                .andReturn();
     }
 
 }
