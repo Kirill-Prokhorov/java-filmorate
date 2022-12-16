@@ -44,5 +44,4 @@ public class ErrorHandler {
         log.error("500 {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
-
 }
